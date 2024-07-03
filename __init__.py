@@ -2,17 +2,6 @@ import bpy
 import re
 from pathlib import Path
 
-# bl_info = {
-# 	"name": "Save with Versioning",
-# 	"description": "Adds versioning to Blender saves",
-# 	"author": "DShot92",
-# 	"version": (1, 0, 0),
-# 	"blender": (2, 80, 0),
-# 	"location": "View3D > Header",
-# 	"category": "System",
-# }
-#
-
 
 # Add-on preferences class
 class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
