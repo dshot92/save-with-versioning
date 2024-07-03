@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 
-id = "save_with_versionig"
+id = "save_with_versioning"
 version = "1.0.0"
 name = "Save with Versioning"
 tagline = "Save incremental and use published files for asset linking"
@@ -22,7 +22,7 @@ blender_version_min = "4.2.0"
 
 # License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
 # https://docs.blender.org/manual/en/dev/extensions/licenses.html
-license = ["SPDX:GPL-2.0-or-later"]
+license = ["SPDX:GPL-3.0-or-later"]
 
 # Optional: required by some licenses.
 copyright = ["2020-2024 Daniele Stochino"]
