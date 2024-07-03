@@ -1,5 +1,4 @@
-
-## Save with Versioning - Blender Add-on
+## Save with Versioning - Blender Extension
 
 ### Description
 The "Save with Versioning" Blender add-on provides a convenient way to save your Blender files with automatic versioning and publishing functionality. This add-on helps you keep track of your project's progress and easily share the latest version with your team or clients.
