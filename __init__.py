@@ -66,6 +66,7 @@ def increment_version(filename, suffix, increment=True):
 class SWV_OT_SaveIncrementOperator(bpy.types.Operator):
     bl_idname = "wm.save_increment_publish"
     bl_label = "Save Increment Publish"
+    bl_description = "Save file and increment the version number"
 
     @classmethod
     def poll(cls, context):
@@ -87,8 +88,11 @@ class SWV_OT_SaveIncrementOperator(bpy.types.Operator):
             filename, version_suffix)
 
         # Save the current with incremented version_suffix
-        new_filepath = directory / f"{filename}{incremented_version}.blend"
+        inc_path = f"{filename}{incremented_version}.blend"
+        new_filepath = directory / inc_path
         bpy.ops.wm.save_as_mainfile(filepath=str(new_filepath))
+
+        self.report({"INFO"}, f"Saved {inc_path}.blend")
 
         return {"FINISHED"}
 
@@ -97,6 +101,7 @@ class SWV_OT_SaveIncrementOperator(bpy.types.Operator):
 class SWV_OT_SavePublishOperator(bpy.types.Operator):
     bl_idname = "wm.save_publish"
     bl_label = "Save Publish"
+    bl_description = "Make copy of current file to published file"
 
     @classmethod
     def poll(cls, context):
@@ -122,8 +127,11 @@ class SWV_OT_SavePublishOperator(bpy.types.Operator):
         bpy.ops.wm.save_as_mainfile(filepath=str(published_filepath))
 
         # Save the current with incremented version_suffix
-        new_filepath = directory / f"{filename}{incremented_version}.blend"
+        inc_path = f"{filename}{incremented_version}.blend"
+        new_filepath = directory / inc_path
         bpy.ops.wm.save_as_mainfile(filepath=str(new_filepath))
+
+        self.report({"INFO"}, f"Published {inc_path}.blend")
 
         return {"FINISHED"}
 
