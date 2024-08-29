@@ -101,6 +101,9 @@ class SWV_OT_SaveIncrementOperator(bpy.types.Operator):
 
         self.report({"INFO"}, f"Saved {inc_path}")
 
+        # Refresh the file list
+        update_file_list(context)
+
         return {"FINISHED"}
 
 
@@ -139,6 +142,9 @@ class SWV_OT_SavePublishOperator(bpy.types.Operator):
         bpy.ops.wm.save_as_mainfile(filepath=str(new_filepath))
 
         self.report({"INFO"}, f"Published {inc_path}")
+
+        # Refresh the file list
+        update_file_list(context)
 
         return {"FINISHED"}
 
