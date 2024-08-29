@@ -204,6 +204,7 @@ def update_file_list(context):
     if not bpy.data.is_saved:
         return
 
+    current_file = bpy.path.basename(bpy.data.filepath)
     directory = os.path.dirname(bpy.data.filepath)
     files = [f for f in os.listdir(directory) if f.endswith('.blend')]
     
@@ -236,6 +237,12 @@ def update_file_list(context):
             sub_item = scene.file_list.add()
             sub_item.name = sub_file
             sub_item.indent = 1
+
+    # Select the current file in the list
+    for index, item in enumerate(scene.file_list):
+        if item.name == current_file:
+            scene.file_list_index = index
+            break
 
     # Trigger a redraw of the UI
     for area in context.screen.areas:
