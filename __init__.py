@@ -28,38 +28,44 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
         layout.prop(self, "publish_suffix")
 
 
-# Function to increment version numbers
 def increment_version(filename, suffix, increment=True):
-    # Extract the base suffix without digits and
-    # determine digit length if any digits exist
+    # Extract base suffix and determine digit length
     base_suffix_match = re.search(r'\D*', suffix)
     base_suffix = base_suffix_match.group() if base_suffix_match else ''
     digit_match = re.search(r'\d+$', suffix)
-    # Default to 3 if no digits found
-    digit_length = len(digit_match.group()) if digit_match else 3
-
+    digit_len = len(digit_match.group()) if digit_match else 3
     # Generate regex pattern based on base suffix
-    pattern = rf"^(.*)({re.escape(base_suffix)})(\d+)$"
+    pattern = rf"^(.*)({re.escape(base_suffix)})(\d+)(_\d+)?$"
     match = re.match(pattern, filename)
-
     if match:
-        # If the filename has a version number,
-        # extract the name and version number
-        name = match.group(1)
-        version = int(match.group(3))
-
-        # Increment number only if increment = true
-        new_version = version + 1 if increment else version
-
+        name, _, version_str, subversion = match.groups()
+        ver = int(version_str)
+        if increment:
+            directory = Path(bpy.data.filepath).parent
+            existing_files = list(directory.glob(f"{name}{base_suffix}*"))
+            version_pattern = rf"{re.escape(base_suffix)}(\d+)(_\d+)?"
+            versions = [
+                (int(m.group(1)), int(m.group(2)[1:]) if m.group(2) else 0)
+                for f in existing_files
+                if (m := re.search(version_pattern, f.stem))
+            ]
+            max_ver, max_subver = max(versions) if versions else (ver, 0)
+            if ver < max_ver:
+                new_subver = 1
+                while (ver, new_subver) in versions:
+                    new_subver += 1
+                new_ver = f"{base_suffix}{ver:0{digit_len}d}_{new_subver:03d}"
+            else:
+                new_ver = f"{base_suffix}{ver + 1:0{digit_len}d}"
+        else:
+            new_ver = f"{base_suffix}{ver:0{digit_len}d}"
+            if subversion:
+                new_ver += subversion
         new_filename = name
-        new_version = f"{base_suffix}{new_version:0{digit_length}d}"
     else:
-        # If the filename does not have a version number,
-        # use the provided suffix
         new_filename = filename
-        new_version = suffix
-
-    return new_filename, new_version
+        new_ver = suffix
+    return new_filename, new_ver
 
 
 # Operator class to save the blend file with Increased Versioning and Publish
