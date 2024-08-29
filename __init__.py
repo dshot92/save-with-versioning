@@ -4,6 +4,7 @@ import bpy
 import re
 from pathlib import Path
 import os
+from bpy.app.handlers import persistent
 
 
 # Add-on preferences class
@@ -176,14 +177,19 @@ class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
 
         # Add save buttons
         row = layout.row()
-        row.operator(SWV_OT_SaveIncrementOperator.bl_idname, text="Save Increment", icon="PLUS")
-        row.operator(SWV_OT_SavePublishOperator.bl_idname, text="Save Publish", icon="ANTIALIASED")
+        row.operator(SWV_OT_SaveIncrementOperator.bl_idname,
+                     text="Save Increment", icon="PLUS")
+        row.operator(SWV_OT_SavePublishOperator.bl_idname,
+                     text="Save Publish", icon="ANTIALIASED")
 
         # Add file list
-        layout.template_list("SWV_UL_FileList", "", scene, "file_list", scene, "file_list_index")
+        row = layout.row()
+        row.template_list("SWV_UL_FileList", "", scene,
+                          "file_list", scene, "file_list_index", rows=5)
 
         # Add refresh button
-        layout.operator(SWV_OT_RefreshFileList.bl_idname, text="Refresh File List", icon="FILE_REFRESH")
+        layout.operator(SWV_OT_RefreshFileList.bl_idname,
+                        text="Refresh File List", icon="FILE_REFRESH")
 
 
 # New operator to refresh the file list
@@ -207,7 +213,7 @@ def update_file_list(context):
     current_file = bpy.path.basename(bpy.data.filepath)
     directory = os.path.dirname(bpy.data.filepath)
     files = [f for f in os.listdir(directory) if f.endswith('.blend')]
-    
+
     # Sort files and group them
     sorted_files = sorted(files)
     file_structure = {}
@@ -257,6 +263,7 @@ def save_versioning_button(self, context):
     self.layout.operator(SWV_OT_SavePublishOperator.bl_idname,
                          text="", icon="ANTIALIASED")
 
+
 classes = (
     SWV_PT_VersioningAddonPreferences,
     SWV_OT_SaveIncrementOperator,
@@ -264,7 +271,7 @@ classes = (
     SWV_UL_FileList,
     SWV_PG_FileItem,
     SWV_PT_SaveWithVersioningPanel,
-    SWV_OT_RefreshFileList,  # Add this new class
+    SWV_OT_RefreshFileList,
 )
 
 
@@ -274,10 +281,14 @@ def register():
         bpy.utils.register_class(bl_class)
 
     # Register file list properties
-    bpy.types.Scene.file_list = bpy.props.CollectionProperty(type=SWV_PG_FileItem)
+    bpy.types.Scene.file_list = bpy.props.CollectionProperty(
+        type=SWV_PG_FileItem)
     bpy.types.Scene.file_list_index = bpy.props.IntProperty()
 
     bpy.types.VIEW3D_HT_header.append(save_versioning_button)
+
+    # Add load handler
+    bpy.app.handlers.load_post.append(load_handler)
 
     # Initial update of the file list
     bpy.app.timers.register(lambda: update_file_list(bpy.context))
@@ -290,7 +301,20 @@ def unregister():
 
     bpy.types.VIEW3D_HT_header.remove(save_versioning_button)
 
+    # Remove load handler
+    bpy.app.handlers.load_post.remove(load_handler)
+
     # Unregister file list properties
     del bpy.types.Scene.file_list
     del bpy.types.Scene.file_list_index
 
+
+@persistent
+def load_handler(dummy):
+    bpy.app.timers.register(update_file_list_when_ready)
+
+def update_file_list_when_ready():
+    if bpy.context.scene is None:
+        return 0.1  # Try again in 0.1 seconds
+    update_file_list(bpy.context)
+    return None  # Don't repeat the timer
