@@ -98,7 +98,7 @@ class SWV_OT_SaveIncrementOperator(bpy.types.Operator):
         new_filepath = directory / inc_path
         bpy.ops.wm.save_as_mainfile(filepath=str(new_filepath))
 
-        self.report({"INFO"}, f"Saved {inc_path}.blend")
+        self.report({"INFO"}, f"Saved {inc_path}")
 
         return {"FINISHED"}
 
@@ -137,7 +137,7 @@ class SWV_OT_SavePublishOperator(bpy.types.Operator):
         new_filepath = directory / inc_path
         bpy.ops.wm.save_as_mainfile(filepath=str(new_filepath))
 
-        self.report({"INFO"}, f"Published {inc_path}.blend")
+        self.report({"INFO"}, f"Published {inc_path}")
 
         return {"FINISHED"}
 
