@@ -3,6 +3,7 @@
 import bpy
 import re
 from pathlib import Path
+import os
 
 
 # Add-on preferences class
@@ -142,6 +143,90 @@ class SWV_OT_SavePublishOperator(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class SWV_UL_FileList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text=item.name, icon='FILE_BLEND')
+
+
+class SWV_PG_FileItem(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    indent: bpy.props.IntProperty()
+
+
+class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
+    bl_label = "Save with Versioning"
+    bl_idname = "SWV_PT_SaveWithVersioningPanel"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Tool'
+
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
+
+        # Add save buttons
+        row = layout.row()
+        row.operator(SWV_OT_SaveIncrementOperator.bl_idname, text="Save Increment", icon="PLUS")
+        row.operator(SWV_OT_SavePublishOperator.bl_idname, text="Save Publish", icon="ANTIALIASED")
+
+        # Add file list
+        layout.template_list("SWV_UL_FileList", "", scene, "file_list", scene, "file_list_index")
+
+        # Add refresh button
+        layout.operator(SWV_OT_RefreshFileList.bl_idname, text="Refresh File List", icon="FILE_REFRESH")
+
+
+# New operator to refresh the file list
+class SWV_OT_RefreshFileList(bpy.types.Operator):
+    bl_idname = "swv.refresh_file_list"
+    bl_label = "Refresh File List"
+    bl_description = "Refresh the list of versioned files"
+
+    def execute(self, context):
+        update_file_list(context)
+        return {'FINISHED'}
+
+
+def update_file_list(context):
+    scene = context.scene
+    scene.file_list.clear()
+
+    if not bpy.data.is_saved:
+        return
+
+    directory = os.path.dirname(bpy.data.filepath)
+    files = [f for f in os.listdir(directory) if f.endswith('.blend')]
+    
+    # Sort files and group them
+    sorted_files = sorted(files)
+    file_structure = {}
+
+    for file in sorted_files:
+        parts = os.path.splitext(file)[0].rsplit('_v', 1)
+        if len(parts) == 2:
+            base, version = parts
+            if '_' in version:
+                main_version, sub_version = version.split('_')
+                if f"{base}_v{main_version}" not in file_structure:
+                    file_structure[f"{base}_v{main_version}"] = []
+                file_structure[f"{base}_v{main_version}"].append(file)
+            else:
+                file_structure[file] = []
+        else:
+            file_structure[file] = []
+
+    # Add files to the list with proper indentation
+    for main_file, sub_files in file_structure.items():
+        item = scene.file_list.add()
+        item.name = main_file + '.blend'
+        item.indent = 0
+
+        for sub_file in sub_files:
+            sub_item = scene.file_list.add()
+            sub_item.name = sub_file
+            sub_item.indent = 1
+
 # Function to add the "Save With Versioning" button to the header
 def save_versioning_button(self, context):
     self.layout.operator(
@@ -149,11 +234,14 @@ def save_versioning_button(self, context):
     self.layout.operator(SWV_OT_SavePublishOperator.bl_idname,
                          text="", icon="ANTIALIASED")
 
-
 classes = (
     SWV_PT_VersioningAddonPreferences,
     SWV_OT_SaveIncrementOperator,
     SWV_OT_SavePublishOperator,
+    SWV_UL_FileList,
+    SWV_PG_FileItem,
+    SWV_PT_SaveWithVersioningPanel,
+    SWV_OT_RefreshFileList,  # Add this new class
 )
 
 
@@ -162,14 +250,24 @@ def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
 
-    # Add button right of Viewport Render Modes
+    # Register file list properties
+    bpy.types.Scene.file_list = bpy.props.CollectionProperty(type=SWV_PG_FileItem)
+    bpy.types.Scene.file_list_index = bpy.props.IntProperty()
+
     bpy.types.VIEW3D_HT_header.append(save_versioning_button)
+
+    # Initial update of the file list
+    bpy.app.timers.register(lambda: update_file_list(bpy.context))
 
 
 # Unregister the add-on
 def unregister():
-    for bl_class in classes:
+    for bl_class in reversed(classes):
         bpy.utils.unregister_class(bl_class)
 
-    # Remove button right of Viewport Render Modes
     bpy.types.VIEW3D_HT_header.remove(save_versioning_button)
+
+    # Unregister file list properties
+    del bpy.types.Scene.file_list
+    del bpy.types.Scene.file_list_index
+
