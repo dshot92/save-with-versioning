@@ -152,7 +152,10 @@ class SWV_OT_SavePublishOperator(bpy.types.Operator):
 class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(text=item.name, icon='FILE_BLEND')
+            if item.indent == 0:
+                layout.label(text=item.name, icon='FILE_BLEND')
+            else:
+                layout.label(text="- " + item.name, icon='FILE_BLEND')
 
 
 class SWV_PG_FileItem(bpy.types.PropertyGroup):
@@ -214,9 +217,10 @@ def update_file_list(context):
             base, version = parts
             if '_' in version:
                 main_version, sub_version = version.split('_')
-                if f"{base}_v{main_version}" not in file_structure:
-                    file_structure[f"{base}_v{main_version}"] = []
-                file_structure[f"{base}_v{main_version}"].append(file)
+                main_file = f"{base}_v{main_version}.blend"
+                if main_file not in file_structure:
+                    file_structure[main_file] = []
+                file_structure[main_file].append(file)
             else:
                 file_structure[file] = []
         else:
@@ -225,13 +229,19 @@ def update_file_list(context):
     # Add files to the list with proper indentation
     for main_file, sub_files in file_structure.items():
         item = scene.file_list.add()
-        item.name = main_file + '.blend'
+        item.name = main_file
         item.indent = 0
 
         for sub_file in sub_files:
             sub_item = scene.file_list.add()
             sub_item.name = sub_file
             sub_item.indent = 1
+
+    # Trigger a redraw of the UI
+    for area in context.screen.areas:
+        if area.type == 'VIEW_3D':
+            area.tag_redraw()
+
 
 # Function to add the "Save With Versioning" button to the header
 def save_versioning_button(self, context):
