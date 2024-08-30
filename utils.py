@@ -54,29 +54,30 @@ def increment_version(filename, suffix, increment=True):
     base_suffix = base_suffix_match.group() if base_suffix_match else ''
     digit_match = re.search(r'\d+$', suffix)
     digit_len = len(digit_match.group()) if digit_match else 3
-    
+
     # Generate regex pattern based on base suffix
     pattern = rf"^(.*?)((?:{re.escape(base_suffix)}\d+)+)$"
     match = re.match(pattern, filename)
-    
+
     if match:
         name, version_part = match.groups()
         versions = re.findall(rf"{re.escape(base_suffix)}(\d+)", version_part)
-        
+
         if increment:
             directory = Path(bpy.data.filepath).parent
-            
+
             # Try incrementing the last version
-            new_versions = versions[:-1] + [f"{int(versions[-1]) + 1:0{digit_len}d}"]
+            new_versions = versions[:-1] + \
+                [f"{int(versions[-1]) + 1:0{digit_len}d}"]
             new_ver = ''.join(f"{base_suffix}{v}" for v in new_versions)
             new_filename = f"{name}{new_ver}"
-            
+
             # Check if the incremented filename already exists
             if (directory / f"{new_filename}.blend").exists():
                 # If it exists, create a new branch
-                new_versions = versions + [f"1".zfill(digit_len)]
+                new_versions = versions + ["1".zfill(digit_len)]
                 new_ver = ''.join(f"{base_suffix}{v}" for v in new_versions)
-            
+
             # Ensure the new filename is unique
             while (directory / f"{name}{new_ver}.blend").exists():
                 last_version = int(new_versions[-1])
@@ -87,7 +88,7 @@ def increment_version(filename, suffix, increment=True):
     else:
         name = filename
         new_ver = suffix
-    
+
     return name, new_ver
 
 
@@ -112,23 +113,25 @@ def update_file_list(context):
 
     current_file = bpy.path.basename(bpy.data.filepath)
     directory = os.path.dirname(bpy.data.filepath)
-    
+
     prefs = context.preferences.addons[__package__].preferences
     base_suffix = re.search(r'\D*', prefs.version_suffix).group()
-    published_suffix = prefs.publish_suffix  # Get published suffix from preferences
-    
+    # Get published suffix from preferences
+    published_suffix = prefs.publish_suffix
+
     # Get the base name of the current file (without extension)
     current_base_name = os.path.splitext(current_file)[0]
-    
+
     # Remove version suffix and published suffix if present
-    current_base_name = re.split(rf'({re.escape(base_suffix)}\d+)+', current_base_name)[0]
+    current_base_name = re.split(
+        rf'({re.escape(base_suffix)}\d+)+', current_base_name)[0]
     if current_base_name.endswith(published_suffix):
         current_base_name = current_base_name[:-len(published_suffix)]
-    
+
     # Update the file filtering to include published files
-    files = [f for f in os.listdir(directory) if f.endswith('.blend') and 
-             (f.startswith(current_base_name) and 
-              (f == current_base_name + '.blend' or 
+    files = [f for f in os.listdir(directory) if f.endswith('.blend') and
+             (f.startswith(current_base_name) and
+              (f == current_base_name + '.blend' or
                re.match(rf'{re.escape(current_base_name)}({re.escape(base_suffix)}\d+)+({re.escape(published_suffix)})?\.blend', f) or
                f == current_base_name + published_suffix + '.blend'))]
 
@@ -137,7 +140,8 @@ def update_file_list(context):
     file_structure = {}
 
     for file in sorted_files:
-        parts = re.findall(rf"({re.escape(base_suffix)}\d+|{re.escape(published_suffix)})", file)
+        parts = re.findall(
+            rf"({re.escape(base_suffix)}\d+|{re.escape(published_suffix)})", file)
         if parts:
             # Remove the published suffix from the key
             key = ''.join([part for part in parts if part != published_suffix])
