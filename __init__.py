@@ -7,7 +7,6 @@ import os
 from bpy.app.handlers import persistent
 
 
-# Add-on preferences class
 class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
@@ -196,7 +195,6 @@ class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
                           "file_list", scene, "file_list_index", rows=10)
 
 
-# New operator to refresh the file list
 class SWV_OT_RefreshFileList(bpy.types.Operator):
     bl_idname = "swv.refresh_file_list"
     bl_label = "Refresh File List"
@@ -299,9 +297,15 @@ def update_file_list(context):
 # Function to add the "Save With Versioning" button to the header
 def save_versioning_button(self, context):
     self.layout.operator(
-        SWV_OT_SaveIncrementOperator.bl_idname, text="", icon="PLUS")
-    self.layout.operator(SWV_OT_SavePublishOperator.bl_idname,
-                         text="", icon="ANTIALIASED")
+        SWV_OT_SaveIncrementOperator.bl_idname,
+        text="",
+        icon="PLUS"
+    )
+    self.layout.operator(
+        SWV_OT_SavePublishOperator.bl_idname,
+        text="",
+        icon="ANTIALIASED"
+    )
 
 
 classes = (
@@ -354,8 +358,9 @@ def unregister():
 def load_handler(dummy):
     bpy.app.timers.register(update_file_list_when_ready)
 
+
 def update_file_list_when_ready():
     if bpy.context.scene is None:
-        return 0.1  # Try again in 0.1 seconds
+        return 10  # Try again in 10 seconds
     update_file_list(bpy.context)
     return None  # Don't repeat the timer
