@@ -24,7 +24,16 @@ class SWV_OT_SaveIncrement(bpy.types.Operator):
         if not saved:
             cls.poll_message_set(
                 "Blend file is not saved. Please save the file first.")
-        return saved
+            return False
+
+        prefs = context.preferences.addons[__package__].preferences
+        filename = bpy.path.basename(bpy.data.filepath)
+        if prefs.publish_suffix in filename:
+            cls.poll_message_set(
+                "This file is already published. Should not be incremented")
+            return False
+
+        return True
 
     def execute(self, context):
         # Get the file path, name and directory
@@ -65,7 +74,15 @@ class SWV_OT_SavePublish(bpy.types.Operator):
         if not saved:
             cls.poll_message_set(
                 "Blend file is not saved. Please save the file first.")
-        return saved
+            return False
+
+        prefs = context.preferences.addons[__package__].preferences
+        filename = bpy.path.basename(bpy.data.filepath)
+        if prefs.publish_suffix in filename:
+            cls.poll_message_set("This file is already published.")
+            return False
+
+        return True
 
     def execute(self, context):
         # Get the file path, name and directory
