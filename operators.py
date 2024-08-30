@@ -20,8 +20,11 @@ class SWV_OT_SaveIncrement(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        # Check if file is saved
-        return bpy.data.is_saved
+        saved = bpy.context.blend_data.is_saved
+        if not saved:
+            cls.poll_message_set(
+                "Blend file is not saved. Please save the file first.")
+        return saved
 
     def execute(self, context):
         # Get the file path, name and directory
@@ -58,8 +61,11 @@ class SWV_OT_SavePublish(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        # Check if file is saved
-        return bpy.data.is_saved
+        saved = bpy.context.blend_data.is_saved
+        if not saved:
+            cls.poll_message_set(
+                "Blend file is not saved. Please save the file first.")
+        return saved
 
     def execute(self, context):
         # Get the file path, name and directory
@@ -97,6 +103,14 @@ class SWV_OT_RefreshFileList(bpy.types.Operator):
     bl_label = "Refresh File List"
     bl_description = "Refresh the list of versioned files"
 
+    @classmethod
+    def poll(cls, context):
+        saved = bpy.context.blend_data.is_saved
+        if not saved:
+            cls.poll_message_set(
+                "Blend file is not saved. Please save the file first.")
+        return saved
+
     def execute(self, context):
         update_file_list(context)
         return {'FINISHED'}
@@ -108,6 +122,14 @@ class SWV_OT_OpenSelectedFile(bpy.types.Operator):
     bl_description = "Open the selected file in the current Blender instance"
 
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+
+    @classmethod
+    def poll(cls, context):
+        saved = bpy.context.blend_data.is_saved
+        if not saved:
+            cls.poll_message_set(
+                "Blend file is not saved. Please save the file first.")
+        return saved
 
     def execute(self, context):
         directory = os.path.dirname(bpy.data.filepath)
