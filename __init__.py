@@ -182,14 +182,18 @@ class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
         row.operator(SWV_OT_SavePublishOperator.bl_idname,
                      text="Save Publish", icon="ANTIALIASED")
 
+        # Add open selected file button
+        row = layout.row()
+        row.operator(SWV_OT_OpenSelectedFile.bl_idname,
+                     text="Open Selected File", icon="FILE_FOLDER")
+
+        # Add refresh button
+        row.operator(SWV_OT_RefreshFileList.bl_idname,
+                     text="", icon="FILE_REFRESH")
         # Add file list
         row = layout.row()
         row.template_list("SWV_UL_FileList", "", scene,
-                          "file_list", scene, "file_list_index", rows=5)
-
-        # Add refresh button
-        layout.operator(SWV_OT_RefreshFileList.bl_idname,
-                        text="Refresh File List", icon="FILE_REFRESH")
+                          "file_list", scene, "file_list_index", rows=10)
 
 
 # New operator to refresh the file list
@@ -201,6 +205,42 @@ class SWV_OT_RefreshFileList(bpy.types.Operator):
     def execute(self, context):
         update_file_list(context)
         return {'FINISHED'}
+
+
+class SWV_OT_OpenSelectedFile(bpy.types.Operator):
+    bl_idname = "swv.open_selected_file"
+    bl_label = "Open Selected File"
+    bl_description = "Open the selected file in the current Blender instance"
+
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.file_list and context.scene.file_list_index >= 0
+
+    def execute(self, context):
+        if not os.path.exists(self.filepath):
+            self.report({'ERROR'}, f"File not found: {self.filepath}")
+            return {'CANCELLED'}
+
+        bpy.ops.wm.open_mainfile(
+            'INVOKE_DEFAULT',
+            filepath=self.filepath,
+            display_file_selector=False)
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        scene = context.scene
+        selected_file = scene.file_list[scene.file_list_index].name
+        directory = os.path.dirname(bpy.data.filepath)
+        self.filepath = os.path.join(directory, selected_file)
+
+        if os.path.exists(self.filepath):
+            return self.execute(context)
+        else:
+            self.report({'ERROR'}, f"File not found: {self.filepath}")
+            return {'CANCELLED'}
 
 
 def update_file_list(context):
@@ -272,6 +312,7 @@ classes = (
     SWV_PG_FileItem,
     SWV_PT_SaveWithVersioningPanel,
     SWV_OT_RefreshFileList,
+    SWV_OT_OpenSelectedFile,
 )
 
 
