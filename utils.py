@@ -112,14 +112,25 @@ def update_file_list(context):
 
     current_file = bpy.path.basename(bpy.data.filepath)
     directory = os.path.dirname(bpy.data.filepath)
-    files = [f for f in os.listdir(directory) if f.endswith('.blend')]
+    
+    prefs = context.preferences.addons[__package__].preferences
+    base_suffix = re.search(r'\D*', prefs.version_suffix).group()
+    
+    # Get the base name of the current file (without extension)
+    current_base_name = os.path.splitext(current_file)[0]
+    
+    # Remove version suffix if present
+    current_base_name = re.split(rf'({re.escape(base_suffix)}\d+)+', current_base_name)[0]
+    
+    # Filter files to include the base file and its versioned variants
+    files = [f for f in os.listdir(directory) if f.endswith('.blend') and 
+             (f.startswith(current_base_name) and 
+              (f == current_base_name + '.blend' or 
+               re.match(rf'{re.escape(current_base_name)}({re.escape(base_suffix)}\d+)+\.blend', f)))]
 
     # Sort files and group them
     sorted_files = sorted(files)
     file_structure = {}
-
-    prefs = context.preferences.addons[__package__].preferences
-    base_suffix = re.search(r'\D*', prefs.version_suffix).group()
 
     for file in sorted_files:
         parts = re.findall(rf"{re.escape(base_suffix)}\d+", file)
