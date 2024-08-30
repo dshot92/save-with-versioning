@@ -98,7 +98,7 @@ def load_handler(dummy):
 
 def update_file_list_when_ready():
     if bpy.context.scene is None:
-        return 10  # Try again in 10 seconds
+        return 0.1  # Try again in 0.1 seconds
     update_file_list(bpy.context)
     return None  # Don't repeat the timer
 
