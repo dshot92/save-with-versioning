@@ -115,27 +115,32 @@ def update_file_list(context):
     
     prefs = context.preferences.addons[__package__].preferences
     base_suffix = re.search(r'\D*', prefs.version_suffix).group()
+    published_suffix = prefs.publish_suffix  # Get published suffix from preferences
     
     # Get the base name of the current file (without extension)
     current_base_name = os.path.splitext(current_file)[0]
     
-    # Remove version suffix if present
+    # Remove version suffix and published suffix if present
     current_base_name = re.split(rf'({re.escape(base_suffix)}\d+)+', current_base_name)[0]
+    if current_base_name.endswith(published_suffix):
+        current_base_name = current_base_name[:-len(published_suffix)]
     
-    # Filter files to include the base file and its versioned variants
+    # Update the file filtering to include published files
     files = [f for f in os.listdir(directory) if f.endswith('.blend') and 
              (f.startswith(current_base_name) and 
               (f == current_base_name + '.blend' or 
-               re.match(rf'{re.escape(current_base_name)}({re.escape(base_suffix)}\d+)+\.blend', f)))]
+               re.match(rf'{re.escape(current_base_name)}({re.escape(base_suffix)}\d+)+({re.escape(published_suffix)})?\.blend', f) or
+               f == current_base_name + published_suffix + '.blend'))]
 
     # Sort files and group them
     sorted_files = sorted(files)
     file_structure = {}
 
     for file in sorted_files:
-        parts = re.findall(rf"{re.escape(base_suffix)}\d+", file)
+        parts = re.findall(rf"({re.escape(base_suffix)}\d+|{re.escape(published_suffix)})", file)
         if parts:
-            key = ''.join(parts[:-1]) if len(parts) > 1 else ''
+            # Remove the published suffix from the key
+            key = ''.join([part for part in parts if part != published_suffix])
             if key not in file_structure:
                 file_structure[key] = []
             file_structure[key].append(file)
