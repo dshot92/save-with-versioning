@@ -12,18 +12,25 @@ class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             row = layout.row(align=True)
-            text = "| " * item.indent + item.name
-
+            text = " | " * item.indent + item.name
             row.label(text=text, icon='FILE_BLEND')
-            # if item.indent == 0:
-            #     row.label(text=item.name, icon='FILE_BLEND')
-            # else:
-            #     row.label(text="| " + item.name, icon='FILE_BLEND')
 
             # Add a small button to open the file
             op = row.operator("swv.open_selected_file", text="",
                               icon='FILEBROWSER', emboss=True)
             op.filepath = item.name
+
+    def filter_items(self, context, data, propname):
+        items = getattr(data, propname)
+        helper_funcs = bpy.types.UI_UL_list
+
+        # Default sort
+        sorted_indices = helper_funcs.sort_items_by_name(items, "name")
+
+        # Filter
+        filtered_indices = helper_funcs.filter_items_by_name(self.filter_name, self.bitflag_filter_item, items, "name", reverse=self.use_filter_sort_reverse)
+
+        return filtered_indices, sorted_indices
 
 
 class SWV_PG_FileItem(bpy.types.PropertyGroup):
