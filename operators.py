@@ -92,26 +92,6 @@ class SWV_OT_SavePublish(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class SWV_UL_FileList(bpy.types.UIList):
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            row = layout.row(align=True)
-            if item.indent == 0:
-                row.label(text=item.name, icon='FILE_BLEND')
-            else:
-                row.label(text="- " + item.name, icon='FILE_BLEND')
-
-            # Add a small button to open the file
-            op = row.operator("swv.open_selected_file", text="",
-                              icon='FILEBROWSER', emboss=True)
-            op.filepath = item.name
-
-
-class SWV_PG_FileItem(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty()
-    indent: bpy.props.IntProperty()
-
-
 class SWV_OT_RefreshFileList(bpy.types.Operator):
     bl_idname = "swv.refresh_file_list"
     bl_label = "Refresh File List"
@@ -168,8 +148,6 @@ class SVM_OT_open_current_dir(bpy.types.Operator):
 classes = (
     SWV_OT_SaveIncrement,
     SWV_OT_SavePublish,
-    SWV_UL_FileList,
-    SWV_PG_FileItem,
     SWV_OT_RefreshFileList,
     SWV_OT_OpenSelectedFile,
     SVM_OT_open_current_dir,
@@ -180,11 +158,6 @@ classes = (
 def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
-
-    # Register file list properties
-    bpy.types.Scene.file_list = bpy.props.CollectionProperty(
-        type=SWV_PG_FileItem)
-    bpy.types.Scene.file_list_index = bpy.props.IntProperty()
 
     # Add load handler
     bpy.app.handlers.load_post.append(load_handler)
@@ -200,7 +173,3 @@ def unregister():
 
     # Remove load handler
     bpy.app.handlers.load_post.remove(load_handler)
-
-    # Unregister file list properties
-    del bpy.types.Scene.file_list
-    del bpy.types.Scene.file_list_index

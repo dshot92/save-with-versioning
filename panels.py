@@ -1,10 +1,31 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import bpy
+
 from .operators import (
     SWV_OT_SaveIncrement,
     SWV_OT_SavePublish
 )
-import bpy
+
+
+class SWV_UL_FileList(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            row = layout.row(align=True)
+            if item.indent == 0:
+                row.label(text=item.name, icon='FILE_BLEND')
+            else:
+                row.label(text="| " + item.name, icon='FILE_BLEND')
+
+            # Add a small button to open the file
+            op = row.operator("swv.open_selected_file", text="",
+                              icon='FILEBROWSER', emboss=True)
+            op.filepath = item.name
+
+
+class SWV_PG_FileItem(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    indent: bpy.props.IntProperty()
 
 
 class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
@@ -60,12 +81,6 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
         layout.prop(self, "publish_suffix")
 
 
-# # Function to add the "Save With Versioning" button to the header
-# def save_versioning_button(self, context):
-#     self.layout.operator("swv.save_increment", text="", icon="PLUS")
-#     self.layout.operator("swv.save_publish", text="", icon="ANTIALIASED")
-
-
 # Function to add the "Save With Versioning" button to the header
 def save_versioning_button(self, context):
     self.layout.operator(
@@ -81,6 +96,8 @@ def save_versioning_button(self, context):
 
 
 classes = (
+    SWV_UL_FileList,
+    SWV_PG_FileItem,
     SWV_PT_SaveWithVersioningPanel,
     SWV_PT_VersioningAddonPreferences,
 )
@@ -90,6 +107,11 @@ def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
 
+    # Register file list properties
+    bpy.types.Scene.file_list = bpy.props.CollectionProperty(
+        type=SWV_PG_FileItem)
+    bpy.types.Scene.file_list_index = bpy.props.IntProperty()
+
     bpy.types.VIEW3D_HT_header.append(save_versioning_button)
 
 
@@ -98,3 +120,7 @@ def unregister():
         bpy.utils.unregister_class(bl_class)
 
     bpy.types.VIEW3D_HT_header.remove(save_versioning_button)
+
+    # Unregister file list properties
+    del bpy.types.Scene.file_list
+    del bpy.types.Scene.file_list_index
