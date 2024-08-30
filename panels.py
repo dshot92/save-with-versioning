@@ -12,10 +12,13 @@ class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             row = layout.row(align=True)
-            if item.indent == 0:
-                row.label(text=item.name, icon='FILE_BLEND')
-            else:
-                row.label(text="| " + item.name, icon='FILE_BLEND')
+            text = "| " * item.indent + item.name
+
+            row.label(text=text, icon='FILE_BLEND')
+            # if item.indent == 0:
+            #     row.label(text=item.name, icon='FILE_BLEND')
+            # else:
+            #     row.label(text="| " + item.name, icon='FILE_BLEND')
 
             # Add a small button to open the file
             op = row.operator("swv.open_selected_file", text="",
