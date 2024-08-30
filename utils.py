@@ -97,6 +97,11 @@ def load_handler(dummy):
     bpy.app.timers.register(update_file_list_when_ready)
 
 
+@persistent
+def save_handler(dummy):
+    bpy.app.timers.register(update_file_list_when_ready)
+
+
 def update_file_list_when_ready():
     if bpy.context.scene is None:
         return 0.1  # Try again in 0.1 seconds
@@ -169,3 +174,13 @@ def update_file_list(context):
     for area in context.screen.areas:
         if area.type == 'VIEW_3D':
             area.tag_redraw()
+
+
+def register():
+    bpy.app.handlers.load_post.append(load_handler)
+    bpy.app.handlers.save_post.append(save_handler)
+
+
+def unregister():
+    bpy.app.handlers.load_post.remove(load_handler)
+    bpy.app.handlers.save_post.remove(save_handler)

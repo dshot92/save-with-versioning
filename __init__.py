@@ -6,7 +6,8 @@
 
 from . import (
     operators,
-    panels
+    panels,
+    utils
 )
 
 
@@ -26,8 +27,10 @@ if "bpy" in locals():
 def register():
     operators.register()
     panels.register()
+    utils.register()
 
 
 def unregister():
+    utils.unregister()
     panels.unregister()
     operators.unregister()
