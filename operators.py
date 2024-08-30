@@ -18,7 +18,7 @@ class SWV_OT_SaveIncrement(bpy.types.Operator):
     bl_label = "Save Increment"
     bl_description = "Save file and increment the version number"
 
-    @ classmethod
+    @classmethod
     def poll(cls, context):
         # Check if file is saved
         return bpy.data.is_saved
@@ -56,7 +56,7 @@ class SWV_OT_SavePublish(bpy.types.Operator):
     bl_label = "Save Publish"
     bl_description = "Make copy of current file to published file"
 
-    @ classmethod
+    @classmethod
     def poll(cls, context):
         # Check if file is saved
         return bpy.data.is_saved

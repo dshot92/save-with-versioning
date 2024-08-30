@@ -28,7 +28,9 @@ class SWV_UL_FileList(bpy.types.UIList):
         sorted_indices = helper_funcs.sort_items_by_name(items, "name")
 
         # Filter
-        filtered_indices = helper_funcs.filter_items_by_name(self.filter_name, self.bitflag_filter_item, items, "name", reverse=self.use_filter_sort_reverse)
+        filtered_indices = helper_funcs.filter_items_by_name(
+            self.filter_name, self.bitflag_filter_item, items, "name",
+            reverse=self.use_filter_sort_reverse)
 
         return filtered_indices, sorted_indices
 
