@@ -121,7 +121,6 @@ def update_file_list(context):
 
     prefs = context.preferences.addons[__package__].preferences
     base_suffix = re.search(r'\D*', prefs.version_suffix).group()
-    # Get published suffix from preferences
     published_suffix = prefs.publish_suffix
 
     # Get the base name of the current file (without extension)
@@ -156,13 +155,27 @@ def update_file_list(context):
         else:
             file_structure[''] = file_structure.get('', []) + [file]
 
+    # Find the published file
+    published_file = next(
+        (f for f in sorted_files if published_suffix in f), None)
+    published_path = os.path.join(
+        directory, published_file) if published_file else None
+
     # Add files to the list with proper indentation
     for key, files in file_structure.items():
         indent = key.count(base_suffix)
         for file in files:
+            file_path = os.path.join(directory, file)
+            is_published = False
+
+            if published_path and os.path.exists(file_path):
+                is_published = files_are_equal(
+                    file_path, published_path, size_delta=10, time_delta=2)
+
             item = scene.file_list.add()
             item.name = file
             item.indent = indent
+            item.is_published = is_published
 
     # Select the current file in the list
     for index, item in enumerate(scene.file_list):
@@ -174,6 +187,22 @@ def update_file_list(context):
     for area in context.screen.areas:
         if area.type == 'VIEW_3D':
             area.tag_redraw()
+
+
+def files_are_equal(file1, file2, size_delta=10, time_delta=1):
+    # Check file sizes with tolerance
+    size1 = os.path.getsize(file1)
+    size2 = os.path.getsize(file2)
+    if abs(size1 - size2) > size_delta:
+        return False
+
+    # Check modification times with tolerance
+    mtime1 = os.path.getmtime(file1)
+    mtime2 = os.path.getmtime(file2)
+    if abs(mtime1 - mtime2) > time_delta:
+        return False
+
+    return True
 
 
 def register():

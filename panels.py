@@ -15,10 +15,15 @@ class SWV_UL_FileList(bpy.types.UIList):
             text = " | " * (item.indent - 1) + item.name
             row.label(text=text, icon='FILE_BLEND')
 
+            # Add publish icon if the file is published
+            if item.is_published:
+                row.label(text="", icon='ANTIALIASED')
+
             # Add a small button to open the file
             op = row.operator("swv.open_selected_file", text="",
                               icon='FILEBROWSER', emboss=True)
             op.filepath = item.name
+
 
     def filter_items(self, context, data, propname):
         items = getattr(data, propname)
@@ -38,6 +43,7 @@ class SWV_UL_FileList(bpy.types.UIList):
 class SWV_PG_FileItem(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty()
     indent: bpy.props.IntProperty()
+    is_published: bpy.props.BoolProperty()
 
 
 class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
