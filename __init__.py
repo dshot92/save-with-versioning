@@ -152,10 +152,16 @@ class SWV_OT_SavePublishOperator(bpy.types.Operator):
 class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            row = layout.row(align=True)
             if item.indent == 0:
-                layout.label(text=item.name, icon='FILE_BLEND')
+                row.label(text=item.name, icon='FILE_BLEND')
             else:
-                layout.label(text="- " + item.name, icon='FILE_BLEND')
+                row.label(text="- " + item.name, icon='FILE_BLEND')
+
+            # Add a small button to open the file
+            op = row.operator("swv.open_selected_file", text="",
+                              icon='FILEBROWSER', emboss=True)
+            op.filepath = item.name
 
 
 class SWV_PG_FileItem(bpy.types.PropertyGroup):
@@ -181,14 +187,11 @@ class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
         row.operator(SWV_OT_SavePublishOperator.bl_idname,
                      text="Save Publish", icon="ANTIALIASED")
 
-        # Add open selected file button
-        row = layout.row()
-        row.operator(SWV_OT_OpenSelectedFile.bl_idname,
-                     text="Open Selected File", icon="FILE_FOLDER")
-
         # Add refresh button
+        # row = layout.row()
         row.operator(SWV_OT_RefreshFileList.bl_idname,
                      text="", icon="FILE_REFRESH")
+
         # Add file list
         row = layout.row()
         row.template_list("SWV_UL_FileList", "", scene,
@@ -212,33 +215,20 @@ class SWV_OT_OpenSelectedFile(bpy.types.Operator):
 
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 
-    @classmethod
-    def poll(cls, context):
-        return context.scene.file_list and context.scene.file_list_index >= 0
-
     def execute(self, context):
-        if not os.path.exists(self.filepath):
-            self.report({'ERROR'}, f"File not found: {self.filepath}")
+        directory = os.path.dirname(bpy.data.filepath)
+        full_path = os.path.join(directory, self.filepath)
+
+        if not os.path.exists(full_path):
+            self.report({'ERROR'}, f"File not found: {full_path}")
             return {'CANCELLED'}
 
         bpy.ops.wm.open_mainfile(
             'INVOKE_DEFAULT',
-            filepath=self.filepath,
+            filepath=full_path,
             display_file_selector=False)
 
         return {'FINISHED'}
-
-    def invoke(self, context, event):
-        scene = context.scene
-        selected_file = scene.file_list[scene.file_list_index].name
-        directory = os.path.dirname(bpy.data.filepath)
-        self.filepath = os.path.join(directory, selected_file)
-
-        if os.path.exists(self.filepath):
-            return self.execute(context)
-        else:
-            self.report({'ERROR'}, f"File not found: {self.filepath}")
-            return {'CANCELLED'}
 
 
 def update_file_list(context):
