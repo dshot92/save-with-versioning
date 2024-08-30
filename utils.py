@@ -189,7 +189,7 @@ def update_file_list(context):
             area.tag_redraw()
 
 
-def files_are_equal(file1, file2, size_delta=10, time_delta=1):
+def files_are_equal(file1, file2, size_delta=10, time_delta=0.5):
     # Check file sizes with tolerance
     size1 = os.path.getsize(file1)
     size2 = os.path.getsize(file2)
