@@ -9,6 +9,7 @@ from .utils import (
     update_file_list,
     load_handler,
     open_current_dir,
+    update_file_list
 )
 
 
@@ -56,7 +57,7 @@ class SWV_OT_SaveIncrement(bpy.types.Operator):
 
         self.report({"INFO"}, f"Saved {inc_path}")
 
-        # Refresh the file list
+        # Update file list immediately
         update_file_list(context)
 
         return {"FINISHED"}
@@ -109,7 +110,7 @@ class SWV_OT_SavePublish(bpy.types.Operator):
 
         self.report({"INFO"}, f"Published {inc_path}")
 
-        # Refresh the file list
+        # Update file list immediately
         update_file_list(context)
 
         return {"FINISHED"}
@@ -198,8 +199,6 @@ def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
     bpy.app.handlers.load_post.append(load_handler)
-    if not bpy.app.timers.is_registered(update_file_list):
-        bpy.app.timers.register(lambda: update_file_list(bpy.context))
 
 
 # Unregister the add-on
@@ -208,5 +207,3 @@ def unregister():
         bpy.utils.unregister_class(bl_class)
     if load_handler in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(load_handler)
-    if bpy.app.timers.is_registered(update_file_list):
-        bpy.app.timers.unregister(update_file_list)

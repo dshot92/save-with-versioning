@@ -1,12 +1,26 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import bpy
+from bpy.app.handlers import persistent
 
 from .operators import (
     SWV_OT_SaveIncrement,
     SWV_OT_SavePublish
 )
 
+def update_panel(self, context):
+    # Unregister the panel
+    try:
+        bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
+    except:
+        pass
+    
+    # Update the bl_category
+    prefs = context.preferences.addons[__package__].preferences
+    SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
+    
+    # Re-register the panel
+    bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
 class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
@@ -50,7 +64,16 @@ class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
     bl_idname = "SWV_PT_SaveWithVersioningPanel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Tool'
+    bl_category = 'Tool'  # Default category
+
+    @classmethod
+    def poll(cls, context):
+        prefs = context.preferences.addons[__package__].preferences
+        if hasattr(prefs, "panel_category"):
+            cls.bl_category = prefs.panel_category
+        else:
+            cls.bl_category = "Tool"
+        return True
 
     def draw(self, context):
         layout = self.layout
@@ -91,11 +114,23 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
         default="_published"
     )
 
+    panel_category: bpy.props.EnumProperty(
+        name="Panel Category",
+        description="Choose the category for the Save with Versioning panel",
+        items=[
+            ('Tool', "Tool", "Place panel in the Tool category"),
+            ('Item', "Item", "Place panel in the Item category"),
+        ],
+        default='Tool',
+        update=update_panel
+    )
+
     def draw(self, context):
         layout = self.layout
         layout.label(text="Set suffix")
         layout.prop(self, "version_suffix")
         layout.prop(self, "publish_suffix")
+        layout.prop(self, "panel_category")
 
 
 # Function to add the "Save With Versioning" button to the header
@@ -120,6 +155,11 @@ classes = (
 )
 
 
+@persistent
+def load_handler(dummy):
+    # Update panel category on file load
+    bpy.app.timers.register(lambda: update_panel(None, bpy.context))
+
 def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
@@ -131,6 +171,8 @@ def register():
 
     bpy.types.VIEW3D_HT_header.append(save_versioning_button)
 
+    bpy.app.handlers.load_post.append(load_handler)
+
 
 def unregister():
     for bl_class in reversed(classes):
@@ -141,3 +183,20 @@ def unregister():
     # Unregister file list properties
     del bpy.types.Scene.file_list
     del bpy.types.Scene.file_list_index
+
+    bpy.app.handlers.load_post.remove(load_handler)
+
+
+def update_panel(self, context):
+    # Unregister the panel
+    try:
+        bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
+    except:
+        pass
+    
+    # Update the bl_category
+    prefs = context.preferences.addons[__package__].preferences
+    SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
+    
+    # Re-register the panel
+    bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
