@@ -123,8 +123,8 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
         name="Panel Category",
         description="Choose the category for the Save with Versioning panel",
         items=[
-            ('Tool', "Tool", "Place panel in the Tool category"),
             ('Item', "Item", "Place panel in the Item category"),
+            ('Tool', "Tool", "Place panel in the Tool category"),
             ('View', "View", "Place panel in the View category"),
             ('Edit', "Edit", "Place panel in the Edit category"),
         ],
