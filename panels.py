@@ -8,22 +8,24 @@ from .operators import (
     SWV_OT_SavePublish
 )
 
+
 def update_panel(self, context):
     # Unregister the panel
     try:
         bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
     except:
         pass
-    
+
     # Update the bl_category
     prefs = context.preferences.addons[__package__].preferences
     SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
-    
+
     # Re-register the panel
     bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
     # Save the preference
     context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
+
 
 class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
@@ -123,6 +125,8 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
         items=[
             ('Tool', "Tool", "Place panel in the Tool category"),
             ('Item', "Item", "Place panel in the Item category"),
+            ('View', "View", "Place panel in the View category"),
+            ('Edit', "Edit", "Place panel in the Edit category"),
         ],
         default='Tool',
         update=update_panel
@@ -163,6 +167,7 @@ def load_handler(dummy):
     # Update panel category on file load
     bpy.app.timers.register(lambda: update_panel(None, bpy.context))
 
+
 def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
@@ -180,6 +185,7 @@ def register():
     addon_prefs = bpy.context.preferences.addons[__package__].preferences
     if addon_prefs:
         update_panel(addon_prefs, bpy.context)
+
 
 def unregister():
     for bl_class in reversed(classes):
@@ -200,11 +206,11 @@ def update_panel(self, context):
         bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
     except:
         pass
-    
+
     # Update the bl_category
     prefs = context.preferences.addons[__package__].preferences
     SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
-    
+
     # Re-register the panel
     bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
