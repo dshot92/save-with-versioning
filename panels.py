@@ -24,7 +24,6 @@ class SWV_UL_FileList(bpy.types.UIList):
                               icon='FILEBROWSER', emboss=True)
             op.filepath = item.name
 
-
     def filter_items(self, context, data, propname):
         items = getattr(data, propname)
         helper_funcs = bpy.types.UI_UL_list
