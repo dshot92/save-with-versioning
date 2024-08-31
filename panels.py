@@ -10,21 +10,30 @@ from .operators import (
 
 
 def update_panel(self, context):
-    # Unregister the panel
+    # Check if we're already updating to prevent recursion
+    if getattr(update_panel, "is_updating", False):
+        return
+    
+    update_panel.is_updating = True
+    
     try:
-        bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
-    except:
-        pass
+        # Unregister the panel
+        try:
+            bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
+        except:
+            pass
 
-    # Update the bl_category
-    prefs = context.preferences.addons[__package__].preferences
-    SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
+        # Update the bl_category
+        prefs = context.preferences.addons[__package__].preferences
+        SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
 
-    # Re-register the panel
-    bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
+        # Re-register the panel
+        bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
-    # Save the preference
-    context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
+        # Save the preference
+        context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
+    finally:
+        update_panel.is_updating = False
 
 
 class SWV_UL_FileList(bpy.types.UIList):
@@ -70,14 +79,25 @@ class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'Tool'  # Default category
+    bl_order = 0  # This will be set dynamically
 
     @classmethod
     def poll(cls, context):
+        tool_order = 100000
+        item_order = 100000
         prefs = context.preferences.addons[__package__].preferences
         if hasattr(prefs, "panel_category"):
             cls.bl_category = prefs.panel_category
+            # Set bl_order based on the category
+            if cls.bl_category == 'Tool':
+                # High number for Tool category (to be at the end)
+                cls.bl_order = tool_order
+            else:
+                # Low number for Item category (to be at the end)
+                cls.bl_order = -item_order
         else:
             cls.bl_category = "Tool"
+            cls.bl_order = tool_order
         return True
 
     def draw(self, context):
@@ -201,18 +221,27 @@ def unregister():
 
 
 def update_panel(self, context):
-    # Unregister the panel
+    # Check if we're already updating to prevent recursion
+    if getattr(update_panel, "is_updating", False):
+        return
+    
+    update_panel.is_updating = True
+    
     try:
-        bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
-    except:
-        pass
+        # Unregister the panel
+        try:
+            bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
+        except:
+            pass
 
-    # Update the bl_category
-    prefs = context.preferences.addons[__package__].preferences
-    SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
+        # Update the bl_category
+        prefs = context.preferences.addons[__package__].preferences
+        SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
 
-    # Re-register the panel
-    bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
+        # Re-register the panel
+        bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
-    # Save the preference
-    context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
+        # Save the preference
+        context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
+    finally:
+        update_panel.is_updating = False
