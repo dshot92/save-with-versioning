@@ -22,6 +22,9 @@ def update_panel(self, context):
     # Re-register the panel
     bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
+    # Save the preference
+    context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
+
 class SWV_UL_FileList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
@@ -173,6 +176,10 @@ def register():
 
     bpy.app.handlers.load_post.append(load_handler)
 
+    # Load saved preferences
+    addon_prefs = bpy.context.preferences.addons[__package__].preferences
+    if addon_prefs:
+        update_panel(addon_prefs, bpy.context)
 
 def unregister():
     for bl_class in reversed(classes):
@@ -200,3 +207,6 @@ def update_panel(self, context):
     
     # Re-register the panel
     bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
+
+    # Save the preference
+    context.preferences.addons[__package__].preferences.panel_category = prefs.panel_category
