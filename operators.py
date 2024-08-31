@@ -197,11 +197,7 @@ classes = (
 def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
-
-    # Add load handler
     bpy.app.handlers.load_post.append(load_handler)
-
-    # Initial update of the file list
     bpy.app.timers.register(lambda: update_file_list(bpy.context))
 
 
@@ -209,6 +205,6 @@ def register():
 def unregister():
     for bl_class in reversed(classes):
         bpy.utils.unregister_class(bl_class)
-
-    # Remove load handler
     bpy.app.handlers.load_post.remove(load_handler)
+    if update_file_list in bpy.app.timers.registered:
+        bpy.app.timers.unregister(update_file_list)

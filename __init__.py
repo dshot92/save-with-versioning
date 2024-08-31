@@ -4,6 +4,8 @@
 # Author: Daniele Stochino (dshot92)
 # ----------------------------------------------------------
 
+import bpy
+
 from . import (
     operators,
     panels,
@@ -13,15 +15,9 @@ from . import (
 
 if "bpy" in locals():
     import importlib
-
-    reloadable_modules = [
-        "operators"
-        "panels"
-    ]
-
-    for module in reloadable_modules:
-        if module in locals():
-            importlib.reload(locals()[module])
+    importlib.reload(operators)
+    importlib.reload(panels)
+    importlib.reload(utils)
 
 
 def register():
