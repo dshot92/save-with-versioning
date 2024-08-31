@@ -198,13 +198,15 @@ def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
     bpy.app.handlers.load_post.append(load_handler)
-    bpy.app.timers.register(lambda: update_file_list(bpy.context))
+    if not bpy.app.timers.is_registered(update_file_list):
+        bpy.app.timers.register(lambda: update_file_list(bpy.context))
 
 
 # Unregister the add-on
 def unregister():
     for bl_class in reversed(classes):
         bpy.utils.unregister_class(bl_class)
-    bpy.app.handlers.load_post.remove(load_handler)
-    if update_file_list in bpy.app.timers.registered:
+    if load_handler in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(load_handler)
+    if bpy.app.timers.is_registered(update_file_list):
         bpy.app.timers.unregister(update_file_list)
