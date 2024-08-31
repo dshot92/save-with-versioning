@@ -4,8 +4,6 @@
 # Author: Daniele Stochino (dshot92)
 # ----------------------------------------------------------
 
-import bpy
-
 from . import (
     operators,
     panels,
