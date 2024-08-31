@@ -4,27 +4,29 @@
 # Author: Daniele Stochino (dshot92)
 # ----------------------------------------------------------
 
-from . import (
+
+import importlib
+
+from . import operators, panels, utils
+
+modules = (
     operators,
     panels,
-    utils
+    utils,
 )
 
-
 if "bpy" in locals():
-    import importlib
     importlib.reload(operators)
     importlib.reload(panels)
     importlib.reload(utils)
 
 
 def register():
-    operators.register()
-    panels.register()
-    utils.register()
+    for module in modules:
+        importlib.reload(module)
+        module.register()
 
 
 def unregister():
-    utils.unregister()
-    panels.unregister()
-    operators.unregister()
+    for module in reversed(modules):
+        module.unregister()
