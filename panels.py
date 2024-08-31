@@ -17,20 +17,17 @@ def update_panel(self, context):
     update_panel.is_updating = True
     
     try:
-        # Unregister the panels
+        # Unregister the panel
         try:
-            bpy.utils.unregister_class(SWV_PT_SaveWithVersioningParentPanel)
             bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
         except:
             pass
 
         # Update the bl_category
         prefs = context.preferences.addons[__package__].preferences
-        SWV_PT_SaveWithVersioningParentPanel.bl_category = prefs.panel_category
         SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
 
-        # Re-register the panels
-        bpy.utils.register_class(SWV_PT_SaveWithVersioningParentPanel)
+        # Re-register the panel
         bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
         # Save the preference
@@ -76,45 +73,31 @@ class SWV_PG_FileItem(bpy.types.PropertyGroup):
     is_published: bpy.props.BoolProperty()
 
 
-class SWV_PT_SaveWithVersioningParentPanel(bpy.types.Panel):
-    bl_label = "Save with Versioning"
-    bl_idname = "SWV_PT_SaveWithVersioningParentPanel"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = 'Tool'  # Default category
-
-    @classmethod
-    def poll(cls, context):
-        prefs = context.preferences.addons[__package__].preferences
-        if hasattr(prefs, "panel_category"):
-            cls.bl_category = prefs.panel_category
-        else:
-            cls.bl_category = prefs.panel_category.default
-        return True
-
-    def draw(self, context):
-        layout = self.layout
-        # Draw all other panels first
-        for panel in context.window_manager.panels:
-            if panel.bl_space_type == 'VIEW_3D' and panel.bl_region_type == 'UI' and panel.bl_category == self.bl_category:
-                if panel.bl_idname != SWV_PT_SaveWithVersioningPanel.bl_idname and panel.bl_idname != self.bl_idname:
-                    panel.draw(context)
-        
-        # Draw our panel last
-        SWV_PT_SaveWithVersioningPanel.draw(self, context)
-
-
 class SWV_PT_SaveWithVersioningPanel(bpy.types.Panel):
     bl_label = "Save with Versioning"
     bl_idname = "SWV_PT_SaveWithVersioningPanel"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'Tool'  # Default category
-    bl_parent_id = "SWV_PT_SaveWithVersioningParentPanel"
-    bl_options = {'HIDE_HEADER'}
+    bl_order = 0  # This will be set dynamically
 
     @classmethod
     def poll(cls, context):
+        tool_order = 100000
+        item_order = 100000
+        prefs = context.preferences.addons[__package__].preferences
+        if hasattr(prefs, "panel_category"):
+            cls.bl_category = prefs.panel_category
+            # Set bl_order based on the category
+            if cls.bl_category == 'Tool':
+                # High number for Tool category (to be at the end)
+                cls.bl_order = tool_order
+            else:
+                # Low number for Item category (to be at the end)
+                cls.bl_order = -item_order
+        else:
+            cls.bl_category = "Tool"
+            cls.bl_order = tool_order
         return True
 
     def draw(self, context):
@@ -160,12 +143,10 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
         name="Panel Category",
         description="Choose the category for the Save with Versioning panel",
         items=[
-            ('Item', "Item", "Place panel in the Item category"),
             ('Tool', "Tool", "Place panel in the Tool category"),
-            ('View', "View", "Place panel in the View category"),
-            ('Edit', "Edit", "Place panel in the Edit category"),
+            ('Item', "Item", "Place panel in the Item category"),
         ],
-        default='Item',
+        default='Tool',
         update=update_panel
     )
 
@@ -194,7 +175,6 @@ def save_versioning_button(self, context):
 classes = (
     SWV_UL_FileList,
     SWV_PG_FileItem,
-    SWV_PT_SaveWithVersioningParentPanel,
     SWV_PT_SaveWithVersioningPanel,
     SWV_PT_VersioningAddonPreferences,
 )
@@ -246,20 +226,17 @@ def update_panel(self, context):
     update_panel.is_updating = True
     
     try:
-        # Unregister the panels
+        # Unregister the panel
         try:
-            bpy.utils.unregister_class(SWV_PT_SaveWithVersioningParentPanel)
             bpy.utils.unregister_class(SWV_PT_SaveWithVersioningPanel)
         except:
             pass
 
         # Update the bl_category
         prefs = context.preferences.addons[__package__].preferences
-        SWV_PT_SaveWithVersioningParentPanel.bl_category = prefs.panel_category
         SWV_PT_SaveWithVersioningPanel.bl_category = prefs.panel_category
 
-        # Re-register the panels
-        bpy.utils.register_class(SWV_PT_SaveWithVersioningParentPanel)
+        # Re-register the panel
         bpy.utils.register_class(SWV_PT_SaveWithVersioningPanel)
 
         # Save the preference
