@@ -148,7 +148,7 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
             ('View', "View", "Place panel in the View category"),
             ('Edit', "Edit", "Place panel in the Edit category"),
         ],
-        default='Tool',
+        default='Item',
         update=update_panel
     )
 
