@@ -14,5 +14,4 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Build Blender Extension
-          uses: dshot92/build-blender-extension@main
-
+          uses: dshot92/build-blender-extension@v1.0.0
