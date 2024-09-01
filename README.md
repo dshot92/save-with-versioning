@@ -1,4 +1,6 @@
-## Save with Versioning - Blender Extension
+## Save with Versioning - [Blender Extension Link](https://extensions.blender.org/add-ons/save-with-versioning/)
+
+![Save with Versioning](https://extensions.blender.org/media/thumbnails/e0/e07eea86dfb0c9c937e86f127404999676bbf969c73891198d67b40f3ea8a4bd_1920x1080.webp)
 
 ### Description
 The "Save with Versioning" Blender add-on provides a convenient way to save your Blender files with automatic versioning and publishing functionality. This add-on helps you keep track of your project's progress and easily share the latest version with your team or clients.
@@ -36,25 +38,17 @@ You can customize the add-on's behavior by accessing the "Save with Versioning" 
 5. **Open Current Directory**: Use the "Open Current Directory" button to access your file's location.
 6. **Change Panel Location**: Adjust the panel's location in the 3D Viewport sidebar by changing the Panel Category in the add-on preferences.
 
-### Example
-With these preferences for suffixes:
+### Versioning Example
 
 ```
-version_suffix = "_v001"
-publish_suffix = "_published"
-file = "scene.blend"
+v001 -> v002 -> v003 -> v004 (Current) -> ... -> v00x
+         |
+         └─> v002_001 -> v002_002 -> ... -> v002_00x
+
+published (Can be updated from any version)
 ```
 
-| Operation    | Current File              | Resulting File                | Notes |
-|--------------|---------------------------|-------------------------------|-------|
-| Initial      | scene.blend               | -                             | Starting file |
-| Increment    | scene.blend               | scene_v001.blend              | First version |
-| Increment    | scene_v001.blend          | scene_v002.blend              | Second version |
-| Publish      | scene_v002.blend          | scene_published.blend         | First published version |
-| Increment    | scene_v002.blend          | scene_v003.blend              | Continue working |
-| Increment    | scene_v003.blend          | scene_v004.blend              | More changes |
-| Publish      | scene_v004.blend          | scene_published.blend         | Update published version |
-| Increment    | scene_v004.blend          | scene_v005.blend              | Continue working |
-| New Branch   | scene_v002.blend          | scene_v002_v001.blend         | Start a new branch from v002 |
-| Increment    | scene_v002_v001.blend     | scene_v002_v002.blend         | Work on new branch |
-| Publish      | scene_v002_v002.blend     | scene_published.blend         | Publish from new branch |
+File naming:
+- Main: scene_v001.blend, scene_v002.blend, etc.
+- Branch: scene_v002_001.blend, scene_v002_002.blend, etc.
+- Published: scene_published.blend
