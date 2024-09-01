@@ -20,8 +20,13 @@ The `increment` and `publish` buttons can be found in two locations:
 
 ### Extension Preferences
 You can customize the add-on's behavior by accessing the "Save with Versioning" preferences:
-- **Version Suffix**: Specify the suffix used for the incremented version numbers.
-- **Publish Suffix**: Specify the suffix used for the published file.
+- **Version Suffix**: Specify the suffix used for the incremented version numbers (e.g., '_v001').
+- **Publish Suffix**: Specify the suffix used for the published file (e.g., '_published').
+- **Panel Category**: Choose the category where the "Save with Versioning" panel will appear in the 3D Viewport sidebar. Options include:
+  - Item
+  - Tool
+  - View
+  - Edit
 
 ### Usage
 1. **Save Increment**: Save the current file with an incremented version number.
@@ -29,6 +34,7 @@ You can customize the add-on's behavior by accessing the "Save with Versioning" 
 3. **View File List**: Use the file list in the sidebar to see all versions of your file.
 4. **Open Files**: Click the folder icon next to a file in the list to open it.
 5. **Open Current Directory**: Use the "Open Current Directory" button to access your file's location.
+6. **Change Panel Location**: Adjust the panel's location in the 3D Viewport sidebar by changing the Panel Category in the add-on preferences.
 
 ### Example
 With these preferences for suffixes:
