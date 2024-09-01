@@ -154,9 +154,16 @@ class SWV_PT_VersioningAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="Set suffix")
-        layout.prop(self, "version_suffix")
-        layout.prop(self, "publish_suffix")
+        
+        layout.label(text="Version Suffix Settings:", icon="PREFERENCES")
+        box = layout.box()
+        box.label(text="Version Suffix (e.g., '_v001'):")
+        box.prop(self, "version_suffix", text="")
+        
+        box.label(text="Publish Suffix (e.g., '_published'):")
+        box.prop(self, "publish_suffix", text="")
+        
+        layout.label(text="Panel Location:", icon="WINDOW")
         layout.prop(self, "panel_category")
 
 
