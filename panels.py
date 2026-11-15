@@ -224,7 +224,8 @@ def unregister():
     del bpy.types.Scene.file_list
     del bpy.types.Scene.file_list_index
 
-    bpy.app.handlers.load_post.remove(load_handler)
+    if load_handler in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(load_handler)
 
 
 def update_panel(self, context):

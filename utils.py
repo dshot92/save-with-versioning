@@ -211,5 +211,7 @@ def register():
 
 
 def unregister():
-    bpy.app.handlers.load_post.remove(load_handler)
-    bpy.app.handlers.save_post.remove(save_handler)
+    if load_handler in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(load_handler)
+    if save_handler in bpy.app.handlers.save_post:
+        bpy.app.handlers.save_post.remove(save_handler)

@@ -7,7 +7,6 @@ import os
 from .utils import (
     increment_version,
     update_file_list,
-    load_handler,
     open_current_dir,
     update_file_list
 )
@@ -198,12 +197,9 @@ classes = (
 def register():
     for bl_class in classes:
         bpy.utils.register_class(bl_class)
-    bpy.app.handlers.load_post.append(load_handler)
 
 
 # Unregister the add-on
 def unregister():
     for bl_class in reversed(classes):
         bpy.utils.unregister_class(bl_class)
-    if load_handler in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.remove(load_handler)
